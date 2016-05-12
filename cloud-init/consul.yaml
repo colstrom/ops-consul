@@ -7,7 +7,7 @@ runcmd:
 - rm -vf /tmp/consul.zip
 - wget -q -O /etc/systemd/system/consul.service https://raw.githubusercontent.com/colstrom/ops-consul/master/systemd/consul.service
 - mkdir -p /etc/consul.d/
-- touch /etc/sysconfig/consul
+- touch /etc/default/consul
 - systemctl daemon-reload
 - systemctl enable consul
 - systemctl start consul
