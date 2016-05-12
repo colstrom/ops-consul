@@ -1,0 +1,7 @@
+#cloud-config
+packages:
+- unzip
+runcmd:
+- wget -q -O /tmp/consul.zip https://releases.hashicorp.com/consul/0.6.4/consul_0.6.4_linux_amd64.zip
+- unzip /tmp/consul.zip -d /usr/local/bin
+- rm -vf /tmp/consul.zip
