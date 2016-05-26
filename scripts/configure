@@ -41,7 +41,7 @@ autoscaled() {
 }
 
 if autoscaled; then
-    printf '{ "bootstrap_expect": %s, "start_join": [%s] }\n' "$(autoscaling minimum-peers)" "$(autoscaling peer-ips | sed -e 's/^/"/' -e 's/$/"/' | tr '\n' , | sed 's/,$//')"
+    printf '{ "bootstrap_expect": %s, "retry_join": [%s] }\n' "$(autoscaling minimum-peers)" "$(autoscaling peer-ips | sed -e 's/^/"/' -e 's/$/"/' | tr '\n' , | sed 's/,$//')"
 else
     printf '{ "bootstrap": %s }\n' "${BOOTSTRAP:-false}"
 fi | tee /etc/consul.d/20-bootstrap.json
