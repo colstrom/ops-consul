@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -o nounset
+
+instance_metadata() {
+    PROPERTY=${1:-''}
+    wget -qO- "http://169.254.169.254/latest/meta-data/${PROPERTY}"
+}
+
+PUBLIC_IPV4=${PUBLIC_IPV4:-$(instance_metadata public-ipv4)}
+REGION=${REGION:-$(instance_metadata placement/availability-zone | sed 's/.$//')}
+
+printf '{ "bootstrap": %s }\n' "${BOOTSTRAP:-false}" | tee /etc/consul.d/20-bootstrap.json
+printf '{ "advertise_addr_wan": "%s" }\n' "${PUBLIC_IPV4}" | tee /etc/consul.d/40-advertise.json
+printf '{ "datacenter": "%s" }\n' "${REGION}" | tee /etc/consul.d/50-datacenter.json
+
+systemctl daemon-reload
+test "${ENABLE:-true}" = false || systemctl enable consul
+test "${START:-true}" = false || systemctl start consul
+test "${RESTART:-true}" = false || systemctl restart consul
