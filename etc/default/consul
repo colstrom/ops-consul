@@ -1,4 +1,1 @@
-CONSUL_CONFIG_FILE=${CONSUL_CONFIG_FILE:-'/etc/consul.json'}
-CONSUL_CONFIG_DIR=${CONSUL_CONFIG_DIR:-'/etc/consul.d'}
-
-CONSUL_AGENT_OPTIONS="-config-file ${CONSUL_CONFIG_FILE} -config-dir ${CONSUL_CONFIG_DIR}"
+CONSUL_AGENT_OPTIONS="-config-file /etc/consul.json -config-dir /etc/consul.d"
