@@ -41,6 +41,7 @@
    | ENABLE               | true                        | Enable consul systemd service?                                    |
    | START                | true                        | Start consul systemd service?                                     |
    | RESTART              | true                        | Restart consul systemd service?                                   |
+   | AUTOSCALING          | true                        | Use autoscaling for initial discovery?                            |
 
 * License
 

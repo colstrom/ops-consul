@@ -9,8 +9,43 @@ instance_metadata() {
 
 PUBLIC_IPV4=${PUBLIC_IPV4:-$(instance_metadata public-ipv4)}
 REGION=${REGION:-$(instance_metadata placement/availability-zone | sed 's/.$//')}
+INSTANCE_ID=${INSTANCE_ID:-$(instance_metadata instance-id)}
 
-printf '{ "bootstrap": %s }\n' "${BOOTSTRAP:-false}" | tee /etc/consul.d/20-bootstrap.json
+autoscaling() {
+    case "${1:-''}" in
+        groups)
+            aws autoscaling describe-auto-scaling-groups --region "${REGION}";;
+        group)
+            autoscaling groups | jq --raw-output ".AutoScalingGroups[] | select(.Instances[].InstanceId | contains(\"${INSTANCE_ID}\"))";;
+        group-name)
+            autoscaling group | jq --raw-output ".AutoScalingGroupName//empty";;
+        instances)
+            aws autoscaling describe-auto-scaling-instances --region "${REGION}";;
+        minimum-peers)
+            autoscaling group | jq --raw-output ".MinSize//empty";;
+        peers)
+            autoscaling instances | jq --raw-output ".AutoScalingInstances[] | select(.AutoScalingGroupName == \"$(autoscaling group-name)\") | select(.InstanceId != \"${INSTANCE_ID}\") .InstanceId//empty";;
+        peer-ips)
+            aws ec2 describe-instances --region "${REGION}" --instance-ids $(autoscaling peers | tr "\n" ' ') | jq --raw-output .Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddress//empty;;
+        *)
+            exit 23;;
+    esac
+}
+
+autoscaled() {
+    if "${AUTOSCALING:-true}" != false; then
+        test -n "$(autoscaling group-name)"
+    else
+        false
+    fi
+}
+
+if autoscaled; then
+    printf '{ "bootstrap_expect": %s, "start_join": [%s] }\n' "$(autoscaling minimum-peers)" "$(autoscaling peer-ips | sed -e 's/^/"/' -e 's/$/"/' | tr '\n' , | sed 's/,$//')"
+else
+    printf '{ "bootstrap": %s }\n' "${BOOTSTRAP:-false}"
+fi | tee /etc/consul.d/20-bootstrap.json
+
 printf '{ "advertise_addr_wan": "%s" }\n' "${PUBLIC_IPV4}" | tee /etc/consul.d/40-advertise.json
 printf '{ "datacenter": "%s" }\n' "${REGION}" | tee /etc/consul.d/50-datacenter.json
 
