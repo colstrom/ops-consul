@@ -1,0 +1,52 @@
+#+TITLE: Consul Operations
+#+LATEX: \pagebreak
+
+* Overview
+
+  This repository includes scripts for deploying Consul.
+
+* scripts/install
+
+  Creates a =consul= user, installs Consul, and installs a systemd service.
+
+** Customizing the install
+
+   | Environment Variable   | Default                                                                   | Description                                                    |
+   |------------------------+---------------------------------------------------------------------------+----------------------------------------------------------------|
+   | WORKDIR                | ${PWD}                                                                    | Installation scripts and assets are expected to be found here. |
+   |------------------------+---------------------------------------------------------------------------+----------------------------------------------------------------|
+   | PLATFORM               | Downcased $(uname -s)                                                     | One of: solaris, freebsd, linux, darwin.                       |
+   | ARCH                   | Modified $(uname -m)                                                      | System architecture (amd64, arm, etc)                          |
+   | CONSUL_VERSION         |                                                                           | Version of Consul to download                                  |
+   | CONSUL_ARTIFACT_HOST   | releases.hashicorp.com                                                    | Where to download artifacts from                               |
+   | CONSUL_ARTIFACT_PATH   | consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_${PLATFORM}_${ARCH}.zip | Path on ${CONSUL_ARTIFACT_HOST} to fetch from.                 |
+   |------------------------+---------------------------------------------------------------------------+----------------------------------------------------------------|
+   | TEMPDIR                | $(mktemp -d -t consul.XXXXXX)                                             | Location to store temporary files.                             |
+   | NO_CLEANUP             | false                                                                     | Do not delete temporary files.                                 |
+   | IGNORE_MISSING_SYSTEMD | false                                                                     | Do not fail if systemd is missing.                             |
+
+   ~WORKDIR~ will be read from STDIN, if given.
+
+* scripts/configure
+
+  Configures a Consul installation. Defaults are practical for AWS, and customizable.
+
+** Customizing the configuration
+
+   | Environment Variable | Default                     | Description                                                       |
+   |----------------------+-----------------------------+-------------------------------------------------------------------|
+   | PUBLIC_IPV4          | Read from instance metadata | The public IP for this node. Used to define ~advertise_addr_wan~. |
+   | REGION               | Read from instance metadata | The region for this node. Used to define ~datacenter~             |
+   | BOOTSTRAP            | false                       | Start consul in bootstrap mode?                                   |
+   | ENABLE               | true                        | Enable consul systemd service?                                    |
+   | START                | true                        | Start consul systemd service?                                     |
+   | RESTART              | true                        | Restart consul systemd service?                                   |
+
+* License
+
+  The contents of this repository are available under the [[https://tldrlegal.com/license/mit-license][MIT License]]. See
+  ~LICENSE.txt~ for the full text.
+
+* Contributors
+
+  - [[https://colstrom.github.io/][Chris Olstrom]] | [[mailto:chris@olstrom.com][e-mail]] | [[https://twitter.com/ChrisOlstrom][Twitter]]
