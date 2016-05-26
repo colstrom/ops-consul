@@ -1,0 +1,62 @@
+#!/bin/sh
+# shellcheck disable=SC2039
+
+set -o nounset
+
+WORKDIR=${PWD}
+test -t 0 || read -r WORKDIR
+
+PLATFORM=${PLATFORM:-$(uname -s | tr '[:upper:]' '[:lower:]')}
+
+test -z "${ARCH}" || case $(uname -m) in
+    x86_64)
+        ARCH='amd64';;
+    arm*)
+        ARCH='arm';;
+    *)
+        echo "Unsupported architecture: $(uname -m)" >&2
+        exit 1
+esac
+
+CONSUL_VERSION=${CONSUL_VERSION:-'0.6.4'}
+CONSUL_ARTIFACT_HOST=${CONSUL_ARTIFACT_HOST:-'releases.hashicorp.com'}
+CONSUL_ARTIFACT_PATH=${CONSUL_ARTIFACT_PATH:-"consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_${PLATFORM}_${ARCH}.zip"}
+CONSUL_ARTIFACT="https://${CONSUL_ARTIFACT_HOST}/${CONSUL_ARTIFACT_PATH}"
+
+TEMPDIR=$(mktemp -d -t consul.XXXXXX)
+# shellcheck disable=SC2064
+trap "rm -rf ${TEMPDIR}" HUP INT TERM EXIT
+
+test "${OFFLINE:-false}" = true || wget -O "${TEMPDIR}/consul.zip" "${CONSUL_ARTIFACT}"
+
+
+adduser() {
+    if command adduser --help 2>&1 | grep -q -- --system; then
+        command adduser --system "${@}"
+    else
+        command adduser -S "${@}"
+    fi
+}
+id consul >/dev/null || adduser consul
+
+install -m 755 -d /usr/local/bin
+unzip -d /usr/local/bin "${TEMPDIR}/consul.zip"
+
+install -m 755 -d /etc/consul.d
+install -o consul -m 644 "${WORKDIR}/etc/consul.json" /etc/consul.json
+
+test "${IGNORE_MISSING_SYSTEMD:-false}" != false || if ! test -d /etc/systemd/system; then
+    cat &>2 <<EOF
+Not Found: /etc/systemd/system
+
+This installation requires systemd, which appears to be missing. You can skip
+this check by setting IGNORE_MISSING_SYSTEMD to a non-false value.
+
+EOF
+    exit 2
+else
+    install -m 755 -d /etc/systemd/system
+    install -m 644 "${WORKDIR}/etc/systemd/system/consul.service" /etc/systemd/system/consul.service
+    install -m 755 -d /etc/default
+    install -m 644 "${WORKDIR}/etc/default/consul" /etc/default/consul
+fi
