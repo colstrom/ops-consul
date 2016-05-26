@@ -3,7 +3,7 @@
 
 set -o nounset
 
-WORKDIR=${PWD}
+WORKDIR=${WORKDIR:-${PWD}}
 test -t 0 || read -r WORKDIR
 
 PLATFORM=${PLATFORM:-$(uname -s | tr '[:upper:]' '[:lower:]')}
@@ -23,9 +23,14 @@ CONSUL_ARTIFACT_HOST=${CONSUL_ARTIFACT_HOST:-'releases.hashicorp.com'}
 CONSUL_ARTIFACT_PATH=${CONSUL_ARTIFACT_PATH:-"consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_${PLATFORM}_${ARCH}.zip"}
 CONSUL_ARTIFACT="https://${CONSUL_ARTIFACT_HOST}/${CONSUL_ARTIFACT_PATH}"
 
-TEMPDIR=$(mktemp -d -t consul.XXXXXX)
+cleanup() {
+    TARGET=${1:-${TEMPDIR}}
+    test "${NO_CLEANUP:-false}" = false || rm -rf "${TARGET}"
+}
+
+TEMPDIR=${TEMPDIR:-$(mktemp -d -t consul.XXXXXX)}
 # shellcheck disable=SC2064
-trap "rm -rf ${TEMPDIR}" HUP INT TERM EXIT
+trap "cleanup ${TEMPDIR}" HUP INT TERM EXIT
 
 test "${OFFLINE:-false}" = true || wget -O "${TEMPDIR}/consul.zip" "${CONSUL_ARTIFACT}"
 
