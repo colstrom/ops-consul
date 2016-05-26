@@ -1,6 +1,8 @@
 #cloud-config
 packages:
+- awscli
 - git
+- jq
 - openssl
 - unzip
 runcmd:
