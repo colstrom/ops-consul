@@ -8,6 +8,7 @@ instance_metadata() {
 }
 
 PUBLIC_IPV4=${PUBLIC_IPV4:-$(instance_metadata public-ipv4)}
+LOCAL_IPV4=${LOCAL_IPV4:-$(instance_metadata local-ipv4)}
 REGION=${REGION:-$(instance_metadata placement/availability-zone | sed 's/.$//')}
 INSTANCE_ID=${INSTANCE_ID:-$(instance_metadata instance-id)}
 
@@ -46,7 +47,7 @@ else
     printf '{ "bootstrap": %s }\n' "${BOOTSTRAP:-false}"
 fi | tee /etc/consul.d/20-bootstrap.json
 
-printf '{ "advertise_addr_wan": "%s" }\n' "${PUBLIC_IPV4}" | tee /etc/consul.d/40-advertise.json
+printf '{ "advertise_addr": "%s", "advertise_addr_wan": "%s" }\n' "${LOCAL_IPV4}" "${PUBLIC_IPV4}" | tee /etc/consul.d/40-advertise.json
 
 if autoscaled; then
     printf '{ "datacenter": "%s" }' "$(autoscaling group-name | tr ' ' -)"
