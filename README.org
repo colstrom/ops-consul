@@ -5,6 +5,66 @@
 
   This repository includes scripts for deploying Consul.
 
+* Notable Features
+
+  Given appropriate permissions, this installation plays very nicely with
+  AutoScaling Groups. It does this by using the AWS API to find hints about how it
+  should configure itself.
+
+  The minimum number of instances in the autoscaling group is assumed to be the
+  minimum size of the Consul cluster, and all nodes are started with the
+  ~bootstrap_expect~ parameter set accordingly.
+
+  Other instances in the same autoscaling group are assumed to be peers. The IP
+  address of each instance in the autoscaling group is added to the ~retry_join~
+  configuration parameter.
+
+  The name of the autoscaling group will be used as the ~datacenter~
+  configuration parameter. Any spaces will be converted to dashes.
+
+  Together, these address the problem of bootstrapping a Consul cluster in a
+  reproducible manner, without introducing much complexity.
+
+* Requirements
+
+** openssl
+
+   Required to use ~consul~.
+
+** unzip
+
+   HashiCorp distributes ~consul~ artifacts as ZIP archives, so you'll need this
+   to unpack them.
+
+** git
+
+   This is a ~git~ repository. Cloning it is the standard way of consuming it.
+   You could fetch it another way, if you really didn't want ~git~. This would
+   be unsupported.
+
+** awscli
+
+   Used for interacting with the AWS API. This is not required if ~AUTOSCALING~
+   is ~false~.
+
+** jq
+
+   Used for parsing AWS API responses. This is not required if ~AUTOSCALING~ is
+   ~false~.
+
+** IAM Permissions
+
+   If ~AUTOSCALING~ is not ~false~, the cluster will be bootstrapped using some
+   hints from the AWS API. It needs a few permissions to do this. An example of
+   a policy that would meet these requirements can be found under the
+   =example/iam/policy/= directory of this repository.
+
+   | Permission                                 | Purpose                                                         |
+   |--------------------------------------------+-----------------------------------------------------------------|
+   | =autoscaling:DescribeAutoScalingGroups=    | Used to identify the autoscaling group the instance belongs to. |
+   | =autoscaling:DescribeAutoScalingInstances= | Used to identify peers in the autoscaling group.                |
+   | =ec2:DescribeInstances=                    | Used to identify the IP addresseses of peers.                   |
+
 * scripts/install
 
   Creates a =consul= user, installs Consul, and installs a systemd service.
