@@ -58,7 +58,7 @@ fi | tee /etc/consul.d/50-datacenter.json
 systemctl daemon-reload
 
 if test "${AGENT:-false}" != false; then
-    if test -z "${SERVER:-''}"; then
+    if test -z "${SERVER:-}"; then
         echo 'Failed: SERVER is missing or empty' >&2
         false
     else
