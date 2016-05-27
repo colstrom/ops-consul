@@ -93,16 +93,18 @@
 
 ** Customizing the configuration
 
-   | Environment Variable | Default                     | Description                                                       |
-   |----------------------+-----------------------------+-------------------------------------------------------------------|
-   | PUBLIC_IPV4          | Read from instance metadata | The public IP for this node. Used to define ~advertise_addr_wan~. |
-   | LOCAL_IPV4           | Read from instance metadata | The local IP for this node. Used to defined ~advertise_addr~.     |
-   | REGION               | Read from instance metadata | The region for this node. Used to define ~datacenter~             |
-   | BOOTSTRAP            | false                       | Start consul in bootstrap mode?                                   |
-   | ENABLE               | true                        | Enable consul systemd service?                                    |
-   | START                | true                        | Start consul systemd service?                                     |
-   | RESTART              | true                        | Restart consul systemd service?                                   |
-   | AUTOSCALING          | true                        | Use autoscaling for initial discovery?                            |
+   | Environment Variable | Default                     | Description                                                                |
+   |----------------------+-----------------------------+----------------------------------------------------------------------------|
+   | PUBLIC_IPV4          | Read from instance metadata | The public IP for this node. Used to define ~advertise_addr_wan~.          |
+   | LOCAL_IPV4           | Read from instance metadata | The local IP for this node. Used to defined ~advertise_addr~.              |
+   | REGION               | Read from instance metadata | The region for this node. Used to define ~datacenter~                      |
+   | BOOTSTRAP            | false                       | Start consul in bootstrap mode?                                            |
+   | ENABLE               | true                        | Enable consul systemd service?                                             |
+   | START                | true                        | Start consul systemd service?                                              |
+   | RESTART              | true                        | Restart consul systemd service?                                            |
+   | AUTOSCALING          | true                        | Use autoscaling for initial discovery?                                     |
+   | AGENT                | false                       | Run in agent mode, not server.                                             |
+   | SERVER               |                             | Address of the consul server to connect to (only used it ~AGENT~ is true). |
 
 * License
 

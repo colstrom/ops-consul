@@ -62,6 +62,7 @@ EOF
 else
     install -m 755 -d /etc/systemd/system
     install -m 644 "${WORKDIR}/etc/systemd/system/consul.service" /etc/systemd/system/consul.service
+    install -m 644 "${WORKDIR}/etc/systemd/system/consul-agent.service" /etc/systemd/system/consul-agent.service
     install -m 755 -d /etc/default
     install -m 644 "${WORKDIR}/etc/default/consul" /etc/default/consul
 fi
