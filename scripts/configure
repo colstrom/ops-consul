@@ -47,7 +47,12 @@ else
 fi | tee /etc/consul.d/20-bootstrap.json
 
 printf '{ "advertise_addr_wan": "%s" }\n' "${PUBLIC_IPV4}" | tee /etc/consul.d/40-advertise.json
-printf '{ "datacenter": "%s" }\n' "${REGION}" | tee /etc/consul.d/50-datacenter.json
+
+if autoscaled; then
+    printf '{ "datacenter": "%s" }' "$(autoscaling group-name | tr ' ' -)"
+else
+    printf '{ "datacenter": "%s" }\n' "${REGION}"
+fi | tee /etc/consul.d/50-datacenter.json
 
 systemctl daemon-reload
 test "${ENABLE:-true}" = false || systemctl enable consul
