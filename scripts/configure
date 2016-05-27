@@ -62,7 +62,7 @@ if test "${AGENT:-false}" != false; then
         echo 'Failed: SERVER is missing or empty' >&2
         false
     else
-        printf '{ "retry_join": ["%s"] }' "${SERVER}" | tee /etc/consul.d/20-bootstrap.json
+        printf '{ "retry_join": ["%s"] }\n' "${SERVER}" | tee /etc/consul.d/20-bootstrap.json
         test "${ENABLE:-true}" = false || systemctl enable consul-agent
         test "${START:-true}" = false || systemctl start consul-agent
         test "${RESTART:-true}" = false || systemctl restart consul-agent
