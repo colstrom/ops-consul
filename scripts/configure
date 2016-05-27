@@ -60,14 +60,13 @@ systemctl daemon-reload
 if test "${AGENT:-false}" != false; then
     if test -z "${SERVER:-''}"; then
         echo 'Failed: SERVER is missing or empty' >&2
-        exit 1
+        false
+    else
+        printf '{ "retry_join": ["%s"] }' "${SERVER}" | tee /etc/consul.d/20-bootstrap.json
+        test "${ENABLE:-true}" = false || systemctl enable consul-agent
+        test "${START:-true}" = false || systemctl start consul-agent
+        test "${RESTART:-true}" = false || systemctl restart consul-agent
     fi
-
-    printf '{ "retry_join": ["%s"] }' "${SERVER}" | tee /etc/consul.d/20-bootstrap.json
-
-    test "${ENABLE:-true}" = false || systemctl enable consul-agent
-    test "${START:-true}" = false || systemctl start consul-agent
-    test "${RESTART:-true}" = false || systemctl restart consul-agent
 else
     test "${ENABLE:-true}" = false || systemctl enable consul
     test "${START:-true}" = false || systemctl start consul
